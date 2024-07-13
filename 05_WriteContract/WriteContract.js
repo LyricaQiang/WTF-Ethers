@@ -9,10 +9,11 @@ import { ethers } from "ethers";
 // 利用Alchemy的rpc节点连接以太坊网络
 // 准备 alchemy API 可以参考https://github.com/AmazingAng/WTFSolidity/blob/main/Topics/Tools/TOOL04_Alchemy/readme.md
 const ALCHEMY_GOERLI_URL = 'https://eth-goerli.alchemyapi.io/v2/GlaeWuylnNM3uuOo-SAwJxuwTdqHaY5l';
-const provider = new ethers.JsonRpcProvider(ALCHEMY_GOERLI_URL);
+// const provider = new ethers.JsonRpcProvider(ALCHEMY_GOERLI_URL);
+const provider = new ethers.getDefaultProvider()
 
 // 利用私钥和provider创建wallet对象
-const privateKey = '0x227dbb8586117d55284e26620bc76534dfbd2394be34cf4a09cb775d593b6f2b'
+const privateKey = '7458c39b5eda4decb9547c5d9473e1fb5c7dec011676e7fa921c990fe916669f'
 const wallet = new ethers.Wallet(privateKey, provider)
 
 // WETH的ABI
@@ -23,7 +24,7 @@ const abiWETH = [
     "function withdraw(uint) public",
 ];
 // WETH合约地址（Goerli测试网）
-const addressWETH = '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6'
+const addressWETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' // 这里我换成了主网上的地址
 // WETH Contract
 
 // 声明可写合约
@@ -33,7 +34,6 @@ const contractWETH = new ethers.Contract(addressWETH, abiWETH, wallet)
 // contractWETH.connect(wallet)
 
 const main = async () => {
-
     const address = await wallet.getAddress()
     // 1. 读取WETH合约的链上信息（WETH abi）
     console.log("\n1. 读取WETH余额")
@@ -71,6 +71,28 @@ const main = async () => {
         console.log("1. chainlink水龙头: https://faucets.chain.link/goerli")
         console.log("2. paradigm水龙头: https://faucet.paradigm.xyz/")
     }
+
+
+    // // 声明一个可写合约
+    // const contractWETH = new ethers.Contract(addressWETH, abiWETH, wallet)
+    // const address = await wallet.getAddress()
+    // const balanceETH = await contractWETH.balanceOf(address)
+    // console.log(balance)
+    // if(ethers.formatEther(balanceETH) > 0.001) {
+    //     //调用deposit()函数，将0.001 ETH转为WETH
+    //     const res = await contractWETH.deposit({value: ethers.parseEther("0.001")})
+    //     await res.wait()
+    //     // WETH持仓
+    //     console.log(contractWETH.balanceOf(address))
+    //     // ETH余额
+    //     console.log(provider.getBalance(address))
+    //     // 调用transfer()函数，将0.001 WETH转账给 vitalik
+    //     const res2 = contractWETH.transfer("vitalik.eth", ethers.parseEther('0.001'))
+    //     res2.wait()
+    // } else {
+    //     console.log('领测试币')
+    // }
+
 }
 
 main()

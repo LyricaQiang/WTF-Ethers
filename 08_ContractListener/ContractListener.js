@@ -47,6 +47,7 @@ const main = async () => {
   }catch(e){
     console.log(e);
 
-  } 
+  }
 }
+
 main()

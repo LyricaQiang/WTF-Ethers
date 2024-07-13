@@ -1,29 +1,43 @@
-import { ethers } from "ethers";
-import { MerkleTree } from "merkletreejs";
+import {ethers} from "ethers";
+import {MerkleTree} from "merkletreejs";
 import * as contractJson from "./contract.json" assert {type: "json"};
 
 // 1. 生成merkle tree
 console.log("\n1. 生成merkle tree")
 // 白名单地址
 const tokens = [
-    "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", 
+    "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
     "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
     "0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db",
     "0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB"
 ];
 // leaf, merkletree, proof
-const leaf       = tokens.map(x => ethers.keccak256(x))
-const merkletree = new MerkleTree(leaf, ethers.keccak256, { sortPairs: true });
-const proof      = merkletree.getHexProof(leaf[0]);
-const root = merkletree.getHexRoot()
-console.log("Leaf:")
-console.log(leaf)
-console.log("\nMerkleTree:")
-console.log(merkletree.toString())
-console.log("\nProof:")
-console.log(proof)
-console.log("\nRoot:")
-console.log(root)
+// const leaf       = tokens.map(x => ethers.keccak256(x))
+// const merkletree = new MerkleTree(leaf, ethers.keccak256, { sortPairs: true });
+// const proof      = merkletree.getHexProof(leaf[0]);
+// const root = merkletree.getHexRoot()
+// console.log("Leaf:")
+// console.log(leaf)
+// console.log("\nMerkleTree:")
+// console.log(merkletree.toString())
+// console.log("\nProof:")
+// console.log(proof)
+// console.log("\nRoot:")
+// console.log(root)
+
+// 1.将白名单每个地址通过ethers提供的哈希函数加密；2.将加密过后的白名单创建一个 merkle tree;3.拿到merkle tree的叶子节点和根节点
+const leaf = tokens.map(item => ethers.keccak256(item))
+const tree = new MerkleTree(leaf, ethers.keccak256, {sortPairs: true})
+const proof = tree.getLeaf(0) // 获取的是buffer格式
+const proof2 = tree.getHexProof(leaf[0]); // 获取的是十六进制的数据格式，是叶子节点中的哈希值
+console.log(tree)
+console.log(proof, 'proof')
+console.log(proof2, 'proof2')
+const root1 = tree.getHexRoot()
+const root2 = tree.getRoot() // 获取的是buffer格式
+console.log(root1, 'root1')
+console.log(root2, 'root2')
+
 
 // 2. 创建provider和wallet
 // 准备 alchemy API 可以参考https://github.com/AmazingAng/WTFSolidity/blob/main/Topics/Tools/TOOL04_Alchemy/readme.md 
@@ -49,17 +63,19 @@ const abiNFT = [
 // 里面"object"字段对应的数据就是Bytecode，挺长的，608060起始
 // "object": "608060405260646000553480156100...
 const bytecodeNFT = contractJson.default.object;
-const factoryNFT = new ethers.ContractFactory(abiNFT, bytecodeNFT, wallet);
+// const factoryNFT = new ethers.ContractFactory(abiNFT, bytecodeNFT, wallet);
 
 const main = async () => {
     // 读取钱包内ETH余额
     const balanceETH = await provider.getBalance(wallet)
 
     // 如果钱包ETH足够
-    if(ethers.formatEther(balanceETH) > 0.002){
+    if (ethers.formatEther(balanceETH) > 0.002) {
         // 4. 利用contractFactory部署NFT合约
         console.log("\n2. 利用contractFactory部署NFT合约")
         // 部署合约，填入constructor的参数
+        // const merkletree = new MerkleTree(leaf, ethers.keccak256, { sortPairs: true });
+        // const root = merkletree.getHexRoot()
         const contractNFT = await factoryNFT.deploy("WTF Merkle Tree", "WTF", root)
         console.log(`合约地址: ${contractNFT.target}`);
         console.log("等待合约部署上链")
@@ -76,12 +92,22 @@ const main = async () => {
         await tx.wait()
         console.log(`mint成功，地址${tokens[0]} 的NFT余额: ${await contractNFT.balanceOf(tokens[0])}\n`)
 
-    }else{
+    } else {
         // 如果ETH不足
         console.log("ETH不足，去水龙头领一些Goerli ETH")
         console.log("1. alchemy水龙头: https://goerlifaucet.com/")
         console.log("2. paradigm水龙头: https://faucet.paradigm.xyz/")
     }
+}
+
+
+const testMain = async() => {
+    const factoryNFT = new ethers.ContractFactory(abiNFT, bytecodeNFT, wallet)
+    const contractNFT = await factoryNFT.deploy("WTF Merkle Tree", "WTF", root)
+    await contractNFT.waitForDeployment()
+
+    const tx = await contractNFT.mint(token[0], '0', proof)
+    await tx.wait()
 }
 
 main()

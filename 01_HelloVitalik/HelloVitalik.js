@@ -4,9 +4,9 @@ import { ethers } from "ethers";
 // import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.2.3/ethers.js";
 
 // 利用ethers默认的Provider连接以太坊网络
-// const provider = new ethers.getDefaultProvider();
-const ALCHEMY_MAINNET_URL = 'https://eth-mainnet.g.alchemy.com/v2/oKmOQKbneVkxgHZfibs-iFhIlIAl6HDN';
-const provider = new ethers.JsonRpcProvider(ALCHEMY_MAINNET_URL)
+const provider = new ethers.getDefaultProvider();
+// const ALCHEMY_MAINNET_URL = 'https://eth-mainnet.g.alchemy.com/v2/oKmOQKbneVkxgHZfibs-iFhIlIAl6HDN';
+// const provider = new ethers.JsonRpcProvider(ALCHEMY_MAINNET_URL)
 
 const main = async () => {
     // 查询vitalik的ETH余额
@@ -14,3 +14,20 @@ const main = async () => {
     // 将余额输出在console
     console.log(`ETH Balance of vitalik: ${ethers.formatEther(balance)} ETH`);}
 main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

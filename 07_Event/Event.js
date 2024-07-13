@@ -39,4 +39,19 @@ const main = async () => {
     console.log(`地址 ${transferEvents[0].args["from"]} 转账${amount} WETH 到地址 ${transferEvents[0].args["to"]}`)
 }
 
+
+
+// const contractETH = new ethers.Contract(addressWETH, abiWETH, provider)
+// const main = async () => {
+//      const block = await provider.getBlockNumber()
+//      const transferEvent = await contractETH.queryFilter('transfer', block - 10, block)
+//
+// }
+
+// 总结：
+// 智能合约释放的事件会被记录在以太坊虚拟机的日志中，分为两个部分：主题topics和数据data,
+// 以transfer事件为例,传参from to amount，topics包含事件哈希值、转账发起地址、接收地址， data是转账金额
+// 我们可以利用ethers提供的检索合约事件方法queryFilter，获取这个事件相关的信息transferEvents；
+// ethers会根据智能合约的abi自动解析事件，将结果包含在transferEvents的args中
+
 main()

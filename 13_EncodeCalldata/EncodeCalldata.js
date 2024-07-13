@@ -11,7 +11,7 @@ const provider = new ethers.JsonRpcProvider(ALCHEMY_GOERLI_URL);
 
 // 利用私钥和provider创建wallet对象
 const privateKey = '0x227dbb8586117d55284e26620bc76534dfbd2394be34cf4a09cb775d593b'
-const wallet = new ethers.Wallet(privateKey, provider)
+// const wallet = new ethers.Wallet(privateKey, provider)
 
 // WETH的ABI
 const abiWETH = [
@@ -22,7 +22,7 @@ const abiWETH = [
 const addressWETH = '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6'
 
 // 声明WETH合约
-const contractWETH = new ethers.Contract(addressWETH, abiWETH, wallet)
+// const contractWETH = new ethers.Contract(addressWETH, abiWETH, wallet)
 
 const main = async () => {
 
@@ -77,6 +77,48 @@ const main = async () => {
         console.log("2. paradigm水龙头: https://faucet.paradigm.xyz/")
     }
 }
+
+
+
+const wallet = new ethers.Wallet(privateKey, provider)
+const contractWETH = new ethers.Contract(addressWETH ,abiWETH,wallet)
+
+const main = async () => {
+    const addressWallet = wallet.getAddress()
+    const param1 = contractWETH.interface.encodeFunctionData('balanceOf', [addressWallet])
+    const tx = {
+        to: addressWETH,
+        data: param1,
+    }
+    const balanceWETH = await provider.call(tx)
+    console.log(ethers.formatEther(balanceWETH))
+
+
+    const balanceETH = provider.getBalance(wallet)
+    if( ethers.formatEther(balanceETH) > 0.01) {
+        const param2 = contractWETH.interface.encodeFunctionData('deposit')
+        const tx2 = {
+            from: addressWallet,
+            to: addressWETH,
+            data: param2,
+            value: ethers.parseEther(0.01)
+        }
+        const data = await wallet.sendTransaction(tx2)
+        await data.wait()
+
+        console.log(await contractWETH.balanceOf(addressWallet))
+    }
+
+}
+
+
+// 总结：
+// Interface类提供了对合约中函数方法的编码和解码的相关方法，可以更好的与一些特殊的智能合约交互（如代理合约），或者是智能合约与智能合约的交互
+// 编码之后的函数调用数据是一个十六进制的格式化数据，可以直接在以太坊虚拟机上执行
+// 另外provider.call()是模拟调用智能合约函数的方法，而不是执行真实的交易
+
+
+
 
 main()
 
